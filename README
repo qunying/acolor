@@ -1,0 +1,17 @@
+acolor (Ada/ANSI color) is a simple Ada program that makes it easy to color
+and format echoed text. It does this by converting combinations of readable
+arguments (bold, red, green, underline, etc.) into an ANSI escape sequence
+that your terminal emulator or console may understands.
+
+It is Moshe Jacobson's color rewritten in Ada. I could not found his source
+any more, and this ansi-color (http://code.google.com/p/ansi-color/) is done\
+in bash script, a little bit slow on usage.
+
+Why Ada? I think is a great language. Wrote in Ada give me a chance to
+use it.
+
+It is released under GPLv3. See the license file gpl-3.0.txt for detail.
+
+Enjoy!
+
+Qun-Ying
