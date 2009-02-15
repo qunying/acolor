@@ -1,0 +1,12 @@
+      |------------------------------------------------------------------------|
+acolor: Ada/ANSI color
+acolor:
+acolor: acolor is a simple Ada program that makes it easy to color and format
+acolor: output from shell script.  It does this by converting combinations of
+acolor: readable arguments (bold, red, green, underline, etc.) into an ANSI
+acolor: escape sequence that your terminal emulator or console may understands.
+acolor:
+acolor:
+acolor:
+acolor:
+acolor:

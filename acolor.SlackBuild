@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+
+PRGNAME=acolor
+VERSION=1.0
+ARCH=${ARCH:-i486}
+BUILD=${BUILD:-1}
+TAG=${TAG:-S12_2qy}
+
+set -e
+
+CWD=$(pwd)
+TMP={TMP:-/tmp}
+PKG=${PKG:-$TMP/package-$PRGNAME}
+OUTPUT=${OUTOUT:-/tmp}
+
+rm -rf $PKG $TMP/$PRGNAME-$VERSION
+mkdir -p $TMP $PKG $OUTPUT
+cd $TMP
+tar xvf $CWD/$PRGNAME-$VERSION.tar.bz2
+cd $PRGNAME-$VERSION
+chown -R root:root .
+chmod -R u+w,go+r-w,a-s .
+
+make
+
+mkdir -p $PKG/usr/bin
+mkdir -p $PKG/usr/doc/$PRGNAME-$VERSION
+cat $CWD/$PRGNAME.SlackBuild > $PKG/usr/doc/$PRGNAME-$VERSION/$PRGNAME.SlackBuild
+cp $CWD/README $PKG/usr/doc/$PRGNAME-$VERSION
+cp $CWD/$PRGNAME  $PKG/usr/bin
+strip  $PKG/usr/bin/$PRGNAME
+
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+
+mkdir -p $PKG/usr/bin
+mkdir -p $PKG/usr/doc/acolor-$VERSION
+cp README $PKG/usr/doc/acolor-$VERSION
+cp acolor $PKG/usr/bin
+# Fix permissions and wipe the pdf bloat
+find $PKG/usr/doc/$PRGNAME-$VERSION -type f -exec chmod 0644 {} \;
+
+mkdir $PKG/install
+cp slack-desc $PKG/install
+cd $PKG/usr/bin
+ln -s $PRGNAME color
+
+cd $PKG
+makepkg -l y -c n ../$PRGNAME-$VERSION-$ARCH-${BUILD}${TAG}.tgz
