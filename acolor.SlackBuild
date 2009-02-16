@@ -9,7 +9,7 @@ TAG=${TAG:-S12_2qy}
 set -e
 
 CWD=$(pwd)
-TMP={TMP:-/tmp}
+TMP=${TMP:-/tmp}
 PKG=${PKG:-$TMP/package-$PRGNAME}
 OUTPUT=${OUTOUT:-/tmp}
 
@@ -26,22 +26,13 @@ make
 mkdir -p $PKG/usr/bin
 mkdir -p $PKG/usr/doc/$PRGNAME-$VERSION
 cat $CWD/$PRGNAME.SlackBuild > $PKG/usr/doc/$PRGNAME-$VERSION/$PRGNAME.SlackBuild
-cp $CWD/README $PKG/usr/doc/$PRGNAME-$VERSION
-cp $CWD/$PRGNAME  $PKG/usr/bin
+cp README $PKG/usr/doc/$PRGNAME-$VERSION
+cp $PRGNAME  $PKG/usr/bin
 strip  $PKG/usr/bin/$PRGNAME
 
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
-mkdir -p $PKG/usr/bin
-mkdir -p $PKG/usr/doc/acolor-$VERSION
-cp README $PKG/usr/doc/acolor-$VERSION
-cp acolor $PKG/usr/bin
-# Fix permissions and wipe the pdf bloat
-find $PKG/usr/doc/$PRGNAME-$VERSION -type f -exec chmod 0644 {} \;
-
-mkdir $PKG/install
-cp slack-desc $PKG/install
 cd $PKG/usr/bin
 ln -s $PRGNAME color
 
