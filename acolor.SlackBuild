@@ -37,4 +37,4 @@ cd $PKG/usr/bin
 ln -s $PRGNAME color
 
 cd $PKG
-makepkg -l y -c n ../$PRGNAME-$VERSION-$ARCH-${BUILD}${TAG}.tgz
+makepkg -l y -c n $OUTPUT/$PRGNAME-$VERSION-$ARCH-${BUILD}${TAG}.tgz
