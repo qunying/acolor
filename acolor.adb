@@ -29,7 +29,7 @@ with Ada.Characters.Latin_1;
 
 procedure acolor is
    type color is (black, red, green, yellow, blue, magenta, cyan, white);
-   type attribute is (none, nm, normal, bd, bold, ft, faint, it, italic,
+   type attribute is (nm, normal, bd, bold, ft, faint, it, italic,
 		      ul, underline, bl,  blink, fb, fastblink, rv, reversed,
 		      iv, invisible);
    type color_setting is
@@ -69,7 +69,7 @@ procedure acolor is
    begin
       put_string (Latin_1.ESC & '[');
       case in_setting.attr is
-	 when none | nm | normal     => put_string ("0");
+	 when nm | normal     => put_string ("0");
 	 when bd | bold	      => put_string ("1");
 	 when ft | faint      => put_string ("2");
 	 when it | italic     => put_string ("3");
@@ -94,13 +94,9 @@ procedure acolor is
 				 prefix	  : in String) is
       setting : color_setting;
    begin
-      setting.fg_color := white;
+      put_string(" ");
       setting.fg_set   := True;
-      setting.bg_color := black;
       setting.bg_set   := True;
-      setting.attr     := none;
-      put_escape_sequence (setting);
-      Put_Line (To_Lower (color'Image (bg_color)) & ":");
       setting.attr     := attr;
       setting.bg_color := bg_color;
       for i in color'Range loop
@@ -116,7 +112,7 @@ procedure acolor is
    procedure put_color_list is
    begin
       for i in color'Range loop
-	 put_one_color_line (i, none, "   ");
+	 put_one_color_line (i, normal, "   ");
 	 put_one_color_line (i, bold, " lt");
       end loop;
    end put_color_list;
@@ -125,7 +121,7 @@ procedure acolor is
    procedure color_put (str	 : in String;
 			fg_color : in color := white;
 			bg_color : in color := black;
-			attr	 : in attribute := none) is
+			attr	 : in attribute := normal) is
       setting : constant color_setting :=
         (fg_color => fg_color,
 	 fg_set	  => True,
@@ -149,7 +145,7 @@ procedure acolor is
    procedure color_putl (str    : in String;
 			 fg_color : in color := white;
 			 bg_color : in color := black;
-			 attr	  : in attribute := none) is
+			 attr	  : in attribute := normal) is
    begin
       color_put (str, fg_color, bg_color, attr);
       New_Line;
@@ -270,7 +266,7 @@ begin
    end if;
    in_setting.fg_set := False;
    in_setting.bg_set := False;
-   in_setting.attr := none;
+   in_setting.attr := normal;
    -- process the arguments
    for i in 1 .. Argument_Count loop
       if Argument (i) = "-h" or else Argument (i) = "--help" then
