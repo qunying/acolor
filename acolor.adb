@@ -30,19 +30,22 @@ with Ada.Characters.Latin_1;
 procedure acolor is
    type color is (black, red, green, yellow, blue, magenta, cyan, white);
    type attribute is (nm, normal, bd, bold, ft, faint, it, italic,
-		      ul, underline, bl,  blink, fb, fastblink, rv, reversed,
+		      ul, underline, bl, blink, fb, fastblink, rv, reversed,
 		      iv, invisible);
+   type attrs is array (attribute'Range) of Boolean;
+   pragma Pack (attrs);
+
    type color_setting is
    record
       fg_color  : color;
       bg_color  : color;
-      attr      : attribute;
+      attr      : attrs;
       fg_set    : Boolean;
       bg_set    : Boolean;
    end record;
 
    ---------------------------------------------------------------------------
-   version   : constant String := "1.0 20090214";
+   version   : constant String := "1.1 20090221";
    -- use stream output to avoid the terminal CR by text_io
    std_out   : Stream_Access;
    in_setting : color_setting;
@@ -66,19 +69,45 @@ procedure acolor is
 	("30", "31", "32", "33", "34", "35", "36", "37");
       bg_color  : constant array (color'Range) of String (1 .. 2) :=
 	("40", "41", "42", "43", "44", "45", "46", "47");
+      first_attr_set : Boolean := False;
+      i : attribute;
    begin
       put_string (Latin_1.ESC & '[');
-      case in_setting.attr is
-	 when nm | normal     => put_string ("0");
-	 when bd | bold	      => put_string ("1");
-	 when ft | faint      => put_string ("2");
-	 when it | italic     => put_string ("3");
-	 when ul | underline  => put_string ("4");
-	 when bl | blink      => put_string ("5");
-	 when fb | fastblink  => put_string ("6");
-	 when rv | reversed   => put_string ("7");
-	 when iv | invisible  => put_string ("8");
-      end case;
+      i := attribute'First;
+      loop
+	 if in_setting.attr (i)
+	   or else in_setting.attr (attribute'Succ (i)) then
+	    if not first_attr_set then
+	       case i is
+		  when nm | normal     => put_string ("0");
+		  when bd | bold       => put_string ("1");
+		  when ft | faint      => put_string ("2");
+		  when it | italic     => put_string ("3");
+		  when ul | underline  => put_string ("4");
+		  when bl | blink      => put_string ("5");
+		  when fb | fastblink  => put_string ("6");
+		  when rv | reversed   => put_string ("7");
+		  when iv | invisible  => put_string ("8");
+	       end case;
+	       first_attr_set := True;
+	    else
+	       case i is
+		  when nm | normal     => put_string (";0");
+		  when bd | bold       => put_string (";1");
+		  when ft | faint      => put_string (";2");
+		  when it | italic     => put_string (";3");
+		  when ul | underline  => put_string (";4");
+		  when bl | blink      => put_string (";5");
+		  when fb | fastblink  => put_string (";6");
+		  when rv | reversed   => put_string (";7");
+		  when iv | invisible  => put_string (";8");
+	       end case;
+	    end if;
+	 end if;
+	 exit when i = attribute'Pred (attribute'Last);
+	 i := attribute'Succ (attribute'Succ (i));
+      end loop;
+
       if in_setting.fg_set then
 	 put_string (";");
 	 put_string (fg_color (in_setting.fg_color));
@@ -90,11 +119,11 @@ procedure acolor is
    end put_escape_sequence;
 
    procedure put_one_color_line (bg_color : in color;
-				 attr	  : in attribute;
+				 attr	  : in attrs;
 				 prefix	  : in String) is
       setting : color_setting;
    begin
-      put_string(" ");
+      put_string (" ");
       setting.fg_set   := True;
       setting.bg_set   := True;
       setting.attr     := attr;
@@ -112,8 +141,8 @@ procedure acolor is
    procedure put_color_list is
    begin
       for i in color'Range loop
-	 put_one_color_line (i, normal, "   ");
-	 put_one_color_line (i, bold, " lt");
+	 put_one_color_line (i, attrs'(nm => True, others => False), "   ");
+	 put_one_color_line (i, attrs'(bd => True, others => False), " lt");
       end loop;
    end put_color_list;
 
@@ -121,7 +150,8 @@ procedure acolor is
    procedure color_put (str	 : in String;
 			fg_color : in color := white;
 			bg_color : in color := black;
-			attr	 : in attribute := normal) is
+			attr	 : in attrs := (normal => True,
+					     	others => False)) is
       setting : constant color_setting :=
         (fg_color => fg_color,
 	 fg_set	  => True,
@@ -137,15 +167,17 @@ procedure acolor is
    procedure bd_color_put (str    : in String;
 			   fg_color : in color := white;
 			   bg_color : in color := black) is
+      attr : constant attrs := (bold => True, others => False);
    begin
-      color_put (str, fg_color, bg_color, bold);
+      color_put (str, fg_color, bg_color, attr);
    end bd_color_put;
    pragma Inline (bd_color_put);
    ---------------------------------------------------------------------------
    procedure color_putl (str    : in String;
 			 fg_color : in color := white;
 			 bg_color : in color := black;
-			 attr	  : in attribute := normal) is
+			 attr	  : in attrs := (normal => True,
+						 others => False)) is
    begin
       color_put (str, fg_color, bg_color, attr);
       New_Line;
@@ -162,12 +194,12 @@ procedure acolor is
       bd_color_put ("r", cyan);
 
       Put (" " & version);
-      color_put (" Happy Valentine's Day!", red, black, bold);
-      color_putl (" Copyright (C) 2009, Zhu Qun-Ying", green);
+      bd_color_put (" Copyright (C) 2009, Zhu Qun-Ying", green);
+      New_Line;
       color_putl ("This program is free software released under the GPLv3 " &
 	          "or latter.", yellow);
-      Put_Line ("Usage:");
-      color_put ("  acolor", cyan);
+      bd_color_put ("Usage:", green);
+      color_put (" acolor", cyan);
       put_string (" [ ");
       color_put ("effect", magenta);
       put_string (" ] [ [lt]");
@@ -176,40 +208,46 @@ procedure acolor is
       color_put ("bgcolor", green);
       Put_Line (" ]");
 
-      Put_Line  ("        " &
-	         " off                turns off any coloring and resets " &
+      Put_Line  ("              " &
+	         "off        turns off any coloring and resets " &
 	         "to default colors.");
-      Put_Line  ("        " &
-	         " -l,--list          shows all the possible color " &
+      Put_Line  ("              " &
+	         "-l,--list  shows all the possible color " &
 	         "combinations visually.");
-      Put_Line  ("        " &
-	         " -h,--help          list this help");
+      Put_Line  ("              " &
+	         "-h,--help  list this help");
       New_Line;
       put_string ("  ");
       color_put ("effect", magenta);
-      Put_Line (" is one of:");
+      put_string (" could be multiple of (some ");
+      color_put ("effect", magenta);
+      Put_Line ("s may not work for your terminal):");
       put_string ("    ");
-      color_put ("bd bold", white, black, bold);
+      color_put ("bd bold", white, black,
+	         attrs'(bold => True, others => False));
       put_string (" ");
-      color_put ("nm normal", white, black, normal);
+      color_put ("nm normal", white, black);
       put_string (" ");
-      color_put ("ft faint", white, black, faint);
+      color_put ("ft faint", white, black,
+	         attrs'(faint => True, others => False));
       put_string (" ");
-      color_put ("it italic", white, black, italic);
+      color_put ("it italic", white, black,
+	         attrs'(italic => True, others => False));
       put_string (" ");
-      color_put ("ul underline", white, black, underline);
+      color_put ("ul underline", white, black,
+	         attrs'(underline => True, others => False));
       put_string (" ");
-      color_put ("bl blink", white, black, blink);
+      color_put ("bl blink", white, black,
+	         attrs'(blink => True, others => False));
       put_string (" ");
-      color_putl ("fb fastblink", white, black, fastblink);
+      color_putl ("fb fastblink", white, black,
+		  attrs'(fastblink => True, others => False));
       put_string ("    ");
-      color_put ("rv reversed", white, black, reversed);
+      color_put ("rv reversed", white, black,
+	         attrs'(reversed => True, others => False));
       put_string (" ");
       color_put ("iv invisible");
       New_Line;
-      put_string ("  Some ");
-      color_put ("effect", magenta);
-      Put_Line (" may not work for some terminals.");
 
       put_string ("  ");
       color_put ("fg_color", green);
@@ -217,7 +255,7 @@ procedure acolor is
       color_put ("bg_color", green);
       Put_Line (" are one of:");
       put_string ("    ");
-      color_put ("black",     black, cyan);
+      color_put ("black",     black, white);
       color_put (" red",      red);
       color_put (" green",    green);
       color_put (" yellow",   yellow);
@@ -242,15 +280,17 @@ procedure acolor is
 	        "Soft link it to ");
       color_putl ("color", cyan);
       Put_Line ("  to avoid rewrite your script.");
-      Put_Line ("Example:");
-      put_string ("  ");
-      Put_Line ("In a POSIX compliant shell such as bash or ksh, " &
+      bd_color_put ("Example:", green);
+      Put_Line (" In a POSIX compliant shell such as bash or ksh, " &
 	        "you would do:");
 
-      Put ("    ");
-      Put_Line ("echo ""$(acolor ltyellow blue)Hi there.$(acolor off)""");
-      Put ("  to see ");
-      color_putl ("Hi there.", yellow, blue, bold);
+      put_string ("    ");
+      color_putl ("echo ""$(acolor ul yellow blue rv)Hi there.$(acolor off)""",
+	          black, white);
+      put_string ("  to see ");
+      color_putl ("Hi there.", yellow, blue,
+		  attrs'(bold => True, ul => True,
+			 rv => True, others => False));
    end print_usage;
 begin
    ---------------------------------------------------------------------------
@@ -260,13 +300,9 @@ begin
       return;
    end if;
 
-   if Argument_Count > 3 then
-      put_reset;
-      return;
-   end if;
    in_setting.fg_set := False;
    in_setting.bg_set := False;
-   in_setting.attr := normal;
+   in_setting.attr := attrs'(normal => True, others => False);
    -- process the arguments
    for i in 1 .. Argument_Count loop
       if Argument (i) = "-h" or else Argument (i) = "--help" then
@@ -290,7 +326,7 @@ begin
 	 when 'b' =>
 	    case Argument (i)'Length is
 	       when 2 =>
-		  in_setting.attr := attribute'Value (Argument (i));
+		  in_setting.attr (attribute'Value (Argument (i))) := True;
 	       when 4 | 5 =>
 		  if Argument (i)(3) = 'a' or else -- black
 		     Argument (i)(3) = 'u' then -- blue
@@ -302,7 +338,7 @@ begin
 			in_setting.fg_set := True;
 		     end if;
 		  else
-		     in_setting.attr := attribute'Value (Argument (i));
+		     in_setting.attr (attribute'Value (Argument (i))) := True;
 		  end if;
 	       when others =>
 		  put_reset;
@@ -311,7 +347,7 @@ begin
 	 when 'r' =>
 	    case Argument (i)'Length is
 	       when 2 | 8 =>
-		  in_setting.attr := attribute'Value (Argument (i));
+		  in_setting.attr (attribute'Value (Argument (i))) := True;
 	       when 3 =>
 		  if in_setting.fg_set then
 		     in_setting.bg_color := color'Value (Argument (i));
@@ -325,13 +361,13 @@ begin
 		  return;
 	    end case;
 	 when 'n' | 'f' | 'i' | 'u' =>
-	    in_setting.attr := attribute'Value (Argument (i));
+	    in_setting.attr (attribute'Value (Argument (i))) := True;
 	 when 'l' =>
 	    if Argument (i)(2) /= 't' then
 	       put_reset;
 	       return;
 	    end if;
-	    in_setting.attr := bold;
+	    in_setting.attr (bold) := True;
 	    in_setting.fg_color := color'Value
 	       (Argument (i)(3 .. Argument (i)'Length));
 	    in_setting.fg_set := True;
@@ -348,7 +384,7 @@ begin
 	    return;
       end case;
    end loop;
-   -- output an attributes
+   -- output attributes
    put_escape_sequence (in_setting);
 -- when exception happened, just output a reset
 exception

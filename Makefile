@@ -8,4 +8,4 @@ pp:
 
 clean:
 	@echo "cleaning project directory ...."
-	-@rm *.{o,ali} *~ b~*.{adb,ads} >& /dev/null
+	-@rm *.{o,ali} *~ b~*.{adb,ads} acolor >& /dev/null
