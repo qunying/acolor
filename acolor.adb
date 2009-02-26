@@ -302,7 +302,7 @@ begin
 
    in_setting.fg_set := False;
    in_setting.bg_set := False;
-   in_setting.attr := attrs'(normal => True, others => False);
+   in_setting.attr := attrs'(others => False);
    -- process the arguments
    for i in 1 .. Argument_Count loop
       if Argument (i) = "-h" or else Argument (i) = "--help" then
