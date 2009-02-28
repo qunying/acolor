@@ -129,7 +129,9 @@ procedure acolor is
       setting.attr     := attr;
       setting.bg_color := bg_color;
       for i in color'Range loop
-	 setting.fg_color := i;
+	 if first_attr_set then
+	    setting.fg_color := i;
+	 end if;
 	 put_escape_sequence (setting);
 	 put_string (prefix & To_Lower (color'Image (i)) & " ");
 	 put_reset;
