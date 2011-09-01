@@ -3,7 +3,7 @@
 -- acolor -- Ada/ANSI color                                                  --
 -- A simple program to ease ANSE colored text output from your shell script. --
 --                                                                           --
--- Copyright (c) 2009, Zhu Qun-Ying. All Rights Reserved.                    --
+-- Copyright (c) 2009,2011 Zhu Qun-Ying. All Rights Reserved.                --
 --                                                                           --
 -- This program is free software; you can redistribute it and/or modify      --
 -- it under the terms of the GNU General Public License as published by      --
@@ -45,7 +45,7 @@ procedure acolor is
    end record;
 
    ---------------------------------------------------------------------------
-   version   : constant String := "1.1.2 20090227";
+   version   : constant String := "1.1.3 20090303";
    -- use stream output to avoid the terminal CR by text_io
    std_out   : Stream_Access;
    in_setting : color_setting;
@@ -77,32 +77,22 @@ procedure acolor is
       loop
 	 if in_setting.attr (i)
 	   or else in_setting.attr (attribute'Succ (i)) then
-	    if not first_attr_set then
-	       case i is
-		  when nm | normal     => put_string ("0");
-		  when bd | bold       => put_string ("1");
-		  when ft | faint      => put_string ("2");
-		  when it | italic     => put_string ("3");
-		  when ul | underline  => put_string ("4");
-		  when bl | blink      => put_string ("5");
-		  when fb | fastblink  => put_string ("6");
-		  when rv | reversed   => put_string ("7");
-		  when iv | invisible  => put_string ("8");
-	       end case;
-	       first_attr_set := True;
+	    if first_attr_set then
+	       put_string (";");
 	    else
-	       case i is
-		  when nm | normal     => put_string (";0");
-		  when bd | bold       => put_string (";1");
-		  when ft | faint      => put_string (";2");
-		  when it | italic     => put_string (";3");
-		  when ul | underline  => put_string (";4");
-		  when bl | blink      => put_string (";5");
-		  when fb | fastblink  => put_string (";6");
-		  when rv | reversed   => put_string (";7");
-		  when iv | invisible  => put_string (";8");
-	       end case;
+	       first_attr_set := True;
 	    end if;
+	    case i is
+	       when nm | normal     => put_string ("0");
+	       when bd | bold       => put_string ("1");
+	       when ft | faint      => put_string ("2");
+	       when it | italic     => put_string ("3");
+	       when ul | underline  => put_string ("4");
+	       when bl | blink      => put_string ("5");
+	       when fb | fastblink  => put_string ("6");
+	       when rv | reversed   => put_string ("7");
+	       when iv | invisible  => put_string ("8");
+	    end case;
 	 end if;
 	 exit when i = attribute'Pred (attribute'Last);
 	 i := attribute'Succ (attribute'Succ (i));
@@ -195,8 +185,8 @@ procedure acolor is
       bd_color_put ("o", magenta);
       bd_color_put ("r", cyan);
 
-      Put (" " & version);
-      bd_color_put (" Copyright (C) 2009, Zhu Qun-Ying", green);
+      bd_color_put (" " & version, red);
+      bd_color_put (" Copyright (C) 2009,2011 Zhu Qun-Ying", green);
       New_Line;
       color_putl ("This program is free software released under the GPLv3 " &
 	          "or latter.", yellow);
@@ -221,7 +211,7 @@ procedure acolor is
       New_Line;
       put_string ("  ");
       color_put ("effect", magenta);
-      put_string (" could be multiple of (some ");
+      put_string (" could be any of (some ");
       color_put ("effect", magenta);
       Put_Line ("s may not work for your terminal):");
       put_string ("    ");
