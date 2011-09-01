@@ -45,7 +45,7 @@ procedure acolor is
    end record;
 
    ---------------------------------------------------------------------------
-   version   : constant String := "1.1.3 20090303";
+   version   : constant String := "1.1.3 20110831";
    -- use stream output to avoid the terminal CR by text_io
    std_out   : Stream_Access;
    in_setting : color_setting;
