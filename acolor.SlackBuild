@@ -16,7 +16,7 @@ OUTPUT=${OUTOUT:-/tmp}
 rm -rf $PKG $TMP/$PRGNAME-$VERSION
 mkdir -p $TMP $PKG $OUTPUT
 cd $TMP
-tar xvf $CWD/$PRGNAME-$VERSION.tar.bz2
+tar xvf $CWD/$PRGNAME-$VERSION.tar.xz
 cd $PRGNAME-$VERSION
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
