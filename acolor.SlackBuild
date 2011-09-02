@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 PRGNAME=acolor
-VERSION=1.3
+VERSION=${VERSOIN:-1.1.3}
 ARCH=${ARCH:-i486}
 BUILD=${BUILD:-1}
 TAG=${TAG:-S13.37qy}
