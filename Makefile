@@ -1,4 +1,4 @@
-GNAT_FLAGS=-gnatwa -gnata -gnaty3abefiklmnprst
+GNAT_FLAGS=-gnatwa -gnata -gnaty3abefiklmnprst $(SLK_GNAT_FLAGS)
 
 acolor: acolor.adb
 	gnatmake $(GNAT_FLAGS) $@
