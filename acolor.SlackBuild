@@ -31,7 +31,7 @@ fi
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=${PKG:-$TMP/package-$PRGNAME}
-OUTPUT=${OUTOUT:-/tmp}
+OUTPUT=${OUTPUT:-/tmp}
 
 rm -rf $PKG $TMP/$PRGNAME-$VERSION
 mkdir -p $TMP $PKG $OUTPUT
@@ -57,4 +57,4 @@ cd $PKG/usr/bin
 ln -s $PRGNAME color
 
 cd $PKG
-makepkg -l y -c n $(OUTPUT)/$PRGNAME-$VERSION-$ARCH-${BUILD}${TAG}.${PKGTYPE:-txz}
+makepkg -l y -c n ${OUTPUT}/$PRGNAME-$VERSION-$ARCH-${BUILD}${TAG}.${PKGTYPE:-txz}
